@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	 http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/tx
+	 http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<!-- 扫描业务层和数据层组件 -->
+	<context:component-scan base-package="com.bw" />
+	<!-- 数据源 -->
+	<bean name="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="url" value="jdbc:mysql:///test"></property>
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="root"></property>
+	</bean>
+	<!-- 会话工厂 -->
+	<bean name="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 注入数据源 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 别名的包 -->
+		<property name="typeAliasesPackage" value="com.bw.model"></property>
+		<!-- mybatis的扫描映射文件 -->
+		<property name="mapperLocations" value="classpath:com/bw/mapper/*.xml"></property>
+		<!-- 配置mybatis的分页插件 -->
+		
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageHelper">
+					<property name="properties">
+						<props>
+							<prop key="dialect">mysql</prop>
+							<prop key="reasonable">true</prop>
+						</props>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+	<!-- Dao层接口扫描 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+		<!-- mapper接口所在的包 -->
+		<property name="basePackage" value="com.bw.mapper"></property>
+	</bean>
+	<!-- aop的切面:事务管理器(环绕通知) -->
+	<bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<!-- 事务管理规则:AOP切入点    -->
+	<aop:config>
+		<aop:pointcut expression="execution(* com.bw.service.*.*(..))" id="pointcut"/>
+		<aop:advisor advice-ref="advice" pointcut-ref="pointcut"/>	
+	</aop:config>
+	<!-- 切入点增强规则配置 -->
+	<tx:advice id="advice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="add*" rollback-for="java.lang.Exception"/>
+			<tx:method name="save*" rollback-for="java.lang.Exception"/>
+			<tx:method name="delete*" rollback-for="java.lang.Exception"/>
+			<tx:method name="del*" rollback-for="java.lang.Exception"/>
+			<tx:method name="update*" rollback-for="java.lang.Exception"/>
+			<tx:method name="upd*" rollback-for="java.lang.Exception"/>
+			<tx:method name="*add*" rollback-for="java.lang.Exception"/>
+			<tx:method name="*save*" rollback-for="java.lang.Exception"/>
+			<tx:method name="*delete*" rollback-for="java.lang.Exception"/>
+			<tx:method name="*del*" rollback-for="java.lang.Exception"/>
+			<tx:method name="*update*" rollback-for="java.lang.Exception"/>
+			<tx:method name="*upd*" rollback-for="java.lang.Exception"/>
+			<tx:method name="*" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+</beans>

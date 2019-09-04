@@ -1,0 +1,6 @@
+com\bw\mapper\PlantmapperDao.class
+com\bw\service\plantservice.class
+com\bw\service\Plantserviceimpl.class
+com\bw\controller\Plantcontroller.class
+com\bw\model\Plant.class
+com\bw\model\Type.class
